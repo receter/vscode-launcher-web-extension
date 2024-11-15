@@ -1,0 +1,19 @@
+.popup {
+  padding: 1rem;
+  min-width: 30rem;
+}
+
+.inputVscodePath {
+  display: block;
+  box-sizing: border-box;
+  padding: 0.5em;
+  width: 100%;
+  font-size: 1em;
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1em;
+}
