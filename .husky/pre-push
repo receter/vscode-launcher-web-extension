@@ -1,0 +1,3 @@
+printf "\n[PRE-PUSH HOOK] Running tsc checks. This might take a few moments.\n\n"
+
+npx tsc --noEmit

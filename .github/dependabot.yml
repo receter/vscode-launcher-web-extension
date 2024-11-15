@@ -1,0 +1,24 @@
+# Basic `dependabot.yml` file with
+# minimum configuration for npm
+
+version: 2
+updates:
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    # Look for `package.json` and `lock` files in the `root` directory
+    directory: "/"
+    # Check the npm registry for updates every day (weekdays)
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: chore
+      include: scope
+    ignore:
+      # I want to handle major updates manually
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      dev-dependencies:
+        dependency-type: "development"
+      dependencies:
+        dependency-type: "production"
