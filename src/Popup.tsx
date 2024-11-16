@@ -5,6 +5,21 @@ import Browser from "webextension-polyfill";
 
 import styles from "./Popup.module.css";
 
+async function getActiveTabUrlHost() {
+  const [tab] = await Browser.tabs.query({
+    active: true,
+    currentWindow: true,
+  });
+  const url = tab.url;
+
+  if (!url) {
+    return;
+  }
+
+  const urlObject = new URL(url);
+  return urlObject.host;
+}
+
 function Popup() {
   const [vscodePath, setVscodePath] = useState("");
 
@@ -12,16 +27,15 @@ function Popup() {
 
   useEffect(() => {
     const loadVscodePath = async () => {
-      const [tab] = await Browser.tabs.query({
-        active: true,
-        currentWindow: true,
-      });
-      const url = tab.url;
+      const host = await getActiveTabUrlHost();
+      if (!host) {
+        return;
+      }
 
-      const result = await Browser.storage.local.get(url);
-      if (url && result[url]) {
-        const value = result[url] as string;
-        setVscodePath(value);
+      const result = await Browser.storage.local.get(host);
+      const resultValue = result[host] ? String(result[host]) : "";
+      if (resultValue) {
+        setVscodePath(resultValue);
       }
     };
 
@@ -29,20 +43,14 @@ function Popup() {
   }, []);
 
   const saveVscodePath = async () => {
-    const [tab] = await Browser.tabs.query({
-      active: true,
-      currentWindow: true,
-    });
-    const url = tab.url;
-
+    const host = await getActiveTabUrlHost();
+    if (!host) {
+      return;
+    }
     if (vscodePath) {
-      if (url) {
-        await Browser.storage.local.set({ [url]: vscodePath });
-      }
+      await Browser.storage.local.set({ [host]: vscodePath });
     } else {
-      if (url) {
-        await Browser.storage.local.remove(url);
-      }
+      await Browser.storage.local.remove(host);
     }
   };
 
