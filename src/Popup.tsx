@@ -1,5 +1,6 @@
 import "./App.css";
 
+import { Button, Stack, TextInput } from "@sys42/ui";
 import { useEffect, useState } from "react";
 import Browser from "webextension-polyfill";
 
@@ -21,69 +22,63 @@ async function getActiveTabUrlHost() {
 }
 
 function Popup() {
-  const [vscodePath, setVscodePath] = useState("");
-
-  const vscodeUrl = `vscode://${vscodePath}?windowId=_blank`;
+  const [vscodePath, setVscodePath] = useState<string>();
+  const [currentHost, setCurrentHost] = useState<string>();
 
   useEffect(() => {
-    const loadVscodePath = async () => {
+    (async () => {
       const host = await getActiveTabUrlHost();
       if (!host) {
         return;
       }
-
       const result = await Browser.storage.local.get(host);
       const resultValue = result[host] ? String(result[host]) : "";
-      if (resultValue) {
-        setVscodePath(resultValue);
-      }
-    };
-
-    loadVscodePath();
+      setCurrentHost(host);
+      setVscodePath(resultValue);
+    })();
   }, []);
 
-  const saveVscodePath = async () => {
-    const host = await getActiveTabUrlHost();
-    if (!host) {
-      return;
+  useEffect(() => {
+    const updateVscodePath = async (host: string, vscodePath?: string) => {
+      console.log("saveVscodePath", host, vscodePath);
+      if (vscodePath) {
+        await Browser.storage.local.set({ [host]: vscodePath });
+      } else {
+        await Browser.storage.local.remove(host);
+      }
+    };
+    if (currentHost) {
+      updateVscodePath(currentHost, vscodePath);
     }
-    if (vscodePath) {
-      await Browser.storage.local.set({ [host]: vscodePath });
-    } else {
-      await Browser.storage.local.remove(host);
-    }
-  };
+  }, [vscodePath, currentHost]);
+
+  const vscodeUrl = `vscode://${vscodePath}?windowId=_blank`;
 
   return (
-    <div className={styles.popup}>
-      <div>
-        <input
-          id="note"
-          type="text"
-          placeholder={`eg. vscode-remote/wsl+Ubuntu/home/username/project`}
-          value={vscodePath}
-          className={styles.inputVscodePath}
-          onChange={(e) => setVscodePath(e.target.value)}
-        />
-      </div>
-      <div className={styles.buttons}>
-        <button onClick={saveVscodePath}>Save VSCode Path</button>
-        <div>
-          <button
-            disabled={!vscodePath}
-            onClick={async () => {
-              const [tab] = await Browser.tabs.query({
-                active: true,
-                currentWindow: true,
-              });
-              await Browser.tabs.update(tab.id, { url: vscodeUrl });
-            }}
-          >
-            Launch VSCode
-          </button>
-        </div>
-      </div>
-    </div>
+    <Stack className={styles.popup}>
+      <TextInput
+        id="note"
+        type="text"
+        placeholder={`eg. vscode-remote/wsl+Ubuntu/home/username/project`}
+        value={vscodePath ?? ""}
+        className={styles.textInputVscodePath}
+        onChange={(e) => setVscodePath(e.target.value)}
+      />
+      <Button
+        className={styles.buttonLaunchVscode}
+        variant="primary"
+        disabled={!vscodePath}
+        onClick={async () => {
+          const [tab] = await Browser.tabs.query({
+            active: true,
+            currentWindow: true,
+          });
+          await Browser.tabs.update(tab.id, { url: vscodeUrl });
+        }}
+      >
+        Launch VSCode
+      </Button>
+    </Stack>
   );
 }
 
