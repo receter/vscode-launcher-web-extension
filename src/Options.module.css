@@ -4,6 +4,13 @@
 
 .pathListItem {
   display: flex;
+  justify-content: space-between;
+  align-items: start;
   gap: 1rem;
   padding: 0.5rem 0;
+  width: 100%;
+}
+
+.host {
+  cursor: pointer;
 }

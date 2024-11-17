@@ -18,6 +18,10 @@ function Options() {
     })();
   }, []);
 
+  function handleClickHost(host: string) {
+    setNewHost(host);
+  }
+
   const handleAddOrUpdate = async () => {
     if (newHost && newPath) {
       const updatedPaths = { ...vscodePaths, [newHost]: newPath };
@@ -44,36 +48,43 @@ function Options() {
   return (
     <Stack className={styles.options}>
       <h1>Edit VSCode Path Mappings</h1>
-      <Stack>
-        {Object.entries(vscodePaths).map(([host, path]) => (
-          <div key={host} className={styles.pathListItem}>
-            <TextInput value={host} readOnly disabled />
-            <TextInput
-              value={typeof path === "string" ? path : ""}
-              readOnly
-              disabled
-            />
-            <Button onClick={() => handleDelete(host)}>Delete</Button>
+
+      <div className={styles.pathListItem}>
+        <TextInput
+          placeholder="Host"
+          value={newHost}
+          style={{ width: "100%" }}
+          onChange={(e) => setNewHost(e.target.value)}
+        />
+        <TextInput
+          placeholder="VSCode Path"
+          value={newPath}
+          style={{ width: "100%" }}
+          onChange={(e) => setNewPath(e.target.value)}
+        />
+        <Button
+          variant="primary"
+          style={{ whiteSpace: "nowrap" }}
+          onClick={handleAddOrUpdate}
+        >
+          {isExistingHost(newHost) ? "Update mapping" : "Add mapping"}
+        </Button>
+      </div>
+
+      {Object.entries(vscodePaths).map(([host, path]) => (
+        <div key={host} className={styles.pathListItem}>
+          <div>
+            <strong
+              className={styles.host}
+              onClick={() => handleClickHost(host)}
+            >
+              {host}
+            </strong>
+            <div>{String(path)}</div>
           </div>
-        ))}
-      </Stack>
-      <Stack>
-        <div className={styles.pathListItem}>
-          <TextInput
-            placeholder="Host"
-            value={newHost}
-            onChange={(e) => setNewHost(e.target.value)}
-          />
-          <TextInput
-            placeholder="VSCode Path"
-            value={newPath}
-            onChange={(e) => setNewPath(e.target.value)}
-          />
-          <Button onClick={handleAddOrUpdate}>
-            {isExistingHost(newHost) ? "Update mapping" : "Add mapping"}
-          </Button>
+          <Button onClick={() => handleDelete(host)}>Delete</Button>
         </div>
-      </Stack>
+      ))}
     </Stack>
   );
 }
