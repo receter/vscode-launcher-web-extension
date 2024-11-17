@@ -1,0 +1,9 @@
+.options {
+  padding: var(--sys42-spacing-lg);
+}
+
+.pathListItem {
+  display: flex;
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
