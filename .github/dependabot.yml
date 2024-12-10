@@ -18,6 +18,10 @@ updates:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
     groups:
+      # Dependencies you want to update separately (for example your own packages)
+      my-dependencies:
+        patterns:
+          - "@sys42/*"
       dev-dependencies:
         dependency-type: "development"
       dependencies:
